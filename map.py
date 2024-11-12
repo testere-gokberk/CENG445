@@ -1,3 +1,4 @@
+from cell import Cell
 
 class Map:
 
@@ -8,26 +9,36 @@ class Map:
         self.cellsize = cellsize
         self.bgcolor = bgcolor
 
+        self.cells = [self.cols*[None] for _ in self.rows]
+
+        self.components = dict() # component, pos pairs
+
     def __getitem__(self, pos:tuple):
 
         row, col = pos
-
+        
+        try:
+            return self.cells[row][col]
+        except IndexError:
+            raise "Given index exceeds map size"
 
     def __setitem__(self, pos:tuple, component):
 
-        pass
+        row, col = pos
+        self.cells[row][col] = component
 
     def __del__(self, pos:tuple):
 
-        pass
+        row, col = pos
+        self.cells[row][col] = None
 
     def getxy(self, y:int, x:int):
 
-        pass
+        return self.cells[x%self.cellsize][y%self.cellsize]
 
     def place(self, obj, y:int, x:int):
 
-        pass
+        self.components[obj] = (x, y)
 
     def view(self, y:int, x:int, height:int, width:int):
 

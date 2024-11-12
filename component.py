@@ -27,4 +27,3 @@ class Component(ABC):
     def draw(self):
         pass
 
-
