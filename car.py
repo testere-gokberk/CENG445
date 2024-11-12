@@ -1,10 +1,9 @@
 from component import Component
-from abc import ABC, abstractmethod
 
 
 class Car(Component):
 
-    def __init__(self, model:str, map, driver, pos:tuple, angle:int, topspeed:int, topfuel:int, speed:float, fuel:float):
+    def __init__(self, model:str, map, driver:str, pos:tuple, angle:int, topspeed:int, topfuel:int, speed:float, fuel:float):
 
         super().__init__()
         self.model = model
@@ -17,30 +16,41 @@ class Car(Component):
         self.speed = speed
         self.fuel = fuel
 
-    @abstractmethod
+        self.carStarted = False
+        self.accelFlag = False
+        self.breakFlag = False
+        self.turnLeftFlag = False
+        self.turnRightFlag = False
+
     def start(self):
-        pass
+        self.carStarted = True
 
-    @abstractmethod
     def stop(self):
-        pass
+        self.carStarted = False
 
-    @abstractmethod
-    def accel(self):
-        pass    
-
-    @abstractmethod
-    def break(self):
-        pass        
-
-    @abstractmethod
-    def left(self):
-        pass
     
-    @abstractmethod
-    def right(self):
-        pass
+    def accel(self):
+        self.accelFlag = True    
 
-    @abstractmethod
+    def break(self):
+        self.breakFlag = True        
+
+    def left(self):
+        self.turnLeftFlag = True
+    
+    def right(self):
+        self.turnRightFlag = True
+
     def tick(self):
-        pass
+
+        if self.carStarted:
+
+            
+    
+
+
+        self.accelFlag = False
+        self.breakFlag = False
+        self.turnLeftFlag = False
+        self.turnRightFlag = False
+        
