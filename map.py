@@ -9,7 +9,7 @@ class Map:
         self.cellsize = cellsize
         self.bgcolor = bgcolor
 
-        self.cells = [self.cols*[None] for _ in self.rows]
+        self.cells = [self.cols*[None] for _ in range(self.rows)]
 
         self.components = dict() # component, pos pairs
 
