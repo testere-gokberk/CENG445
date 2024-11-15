@@ -7,15 +7,22 @@ class Repo:
         self.objects = dict()   # id - object pairs
         self.users = dict()     # userid - list of ids of objects attched 
         self.objowners = dict()   # id - list of userids who use the object
-          
-    def create(self, *args):
+        self.next_id = 1
+    def create(self, name: str, *args):
+       
+        obj_id = self.next_id
+        self.next_id += 1
 
-        print(*args[1:])
-        self.objects[args[0]] = Map(*(args[1:]))
+        new_obj = Map(*args)  # args unpacks (cols, rows, cellsize, bgcolor) for Map constructor
+       
+        # Store the object in the repository with its unique ID and name
+        self.objects[obj_id] = (obj_id, new_obj)
+        self.objowners[obj_id] = []   # Initialize an empty list for tracking attached users
 
+        return obj_id  # Return the unique ID for the created object
     def list(self):
 
-        print(list(self.objects.items()))
+        return list(self.objects.items())
 
     def listattached(self, user:str):
 
@@ -63,4 +70,3 @@ class Repo:
         
         #anlamadım bunu
         pass
-

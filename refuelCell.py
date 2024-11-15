@@ -1,6 +1,6 @@
 from cell import Cell
 
-class BoosterCell(Cell):
+class RefuelCell(Cell):
 
     def __init__(self, row:int, col:int, rotation:int):
     
@@ -11,4 +11,6 @@ class BoosterCell(Cell):
 
     def interact(self, car, y:int, x:int):
         
-        car.speed *= 1.5
+        car.fuel = car.fuel + 20
+        if car.fuel>car.topfuel:
+            car.fuel = car.topfuel

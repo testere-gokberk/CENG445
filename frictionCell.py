@@ -11,4 +11,4 @@ class FrictionCell(Cell):
 
     def interact(self, car, y:int, x:int):
         
-        car.speed *= 0.9
+        car.speed *= 0.7

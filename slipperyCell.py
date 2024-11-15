@@ -12,4 +12,5 @@ class SlipperyCell(Cell):
 
     def interact(self, car, y:int, x:int):
         
-        car.angle = random.random()
+        car.angle = random.uniform(0, 360)
+
