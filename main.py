@@ -70,7 +70,11 @@ cv = ogr.view(500,500,200,200)
 cv.draw()
 
 frr.start()
+
 frr.tick()
+
+
+
 frr.accel()
 frr.left()
 frr.tick()

@@ -419,19 +419,6 @@ class Car(Component):
             else:
                 self.fuel = self.fuel - ((distance / 100 ) * (self.speed / 100)) ## have enough fuel, reduce it
 
-            move(distance)
-
-            if(self.breakFlag):
-                self.speed -= 10 
-                self.breakFlag = False
-
-            ## move it with average speed, then set normal speed
-
-            if(self.accelFlag):
-                self.speed += acceleration
-                self.accelFlag = False
-
-
             def move(distance_to_travel):
                 
 
@@ -491,6 +478,20 @@ class Car(Component):
 
                 if remaining_distance > 0:
                     move(remaining_distance)
+
+
+            move(distance)
+
+            if(self.breakFlag):
+                self.speed -= 10 
+                self.breakFlag = False
+
+            ## move it with average speed, then set normal speed
+
+            if(self.accelFlag):
+                self.speed += acceleration
+                self.accelFlag = False
+
 
             self.accelFlag = False
             self.breakFlag = False

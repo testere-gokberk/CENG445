@@ -51,11 +51,32 @@ class Map:
 
     def draw(self):
         
+        cars = []
+
+        print("DRAWING")
+        print(self.components)
+        for component_name, component_obj in self.components._components.items():
+
+            print(component_obj)
+            if isinstance(component_obj, components.Car):
+                cars.append((component_obj, (int(component_obj.pos[0]/self.cellsize), int(component_obj.pos[1]/self.cellsize))))
+
         bar = "\n" +"----"*self.cols
         for i in range(self.rows):
 
             print(" | ", end="")
             for j in range(self.cols):
+
+                car_printed = False
+
+                for car in cars:
+                    if car[1][0] == i and car[1][1] == j:
+                        car[0].draw()
+                        car_printed = True
+
+                if car_printed:
+                    print(" | ", end="")
+                    continue
                 
                 if len(self.cells[i][j]) > 0 and isinstance(self.cells[i][j][-1], components.Cell):
 

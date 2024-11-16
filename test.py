@@ -41,6 +41,7 @@ frr.driver = "eren"
 
 frr.start()
 
+print("MAP LIST")
 eren.components.list()
 
 print("REPO LIST")
@@ -54,9 +55,13 @@ view[(1,1)] = sampleRepo.components.create("booster")
 view.draw()
 
 
+print("MAAAP")
 eren.draw()
 
-    
+print("REPO COMPONENTS")
+sampleRepo.components.list()
+
+
 frr.tick()
 
 eren.draw()
