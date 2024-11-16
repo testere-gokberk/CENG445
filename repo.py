@@ -1,4 +1,6 @@
 from map import Map
+from components import Component
+from components import ComponentFactory
 
 class Repo:
 
@@ -7,7 +9,8 @@ class Repo:
         self.objects = dict()   # id - object pairs
         self.users = dict()     # userid - list of ids of objects attched 
         self.objowners = dict()   # id - list of userids who use the object
-          
+        self.components = ComponentFactory()
+
     def create(self, *args):
 
         print(*args[1:])
@@ -61,6 +64,5 @@ class Repo:
 
     def delete(self, id:int):
         
-        #anlamadım bunu
-        pass
-
+        del self.objects[id]
+        
