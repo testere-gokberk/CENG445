@@ -1,7 +1,7 @@
 from repo import Repo
 
 sampleRepo = Repo()
-    
+
 sampleRepo.create("F571", 10,10, 64, 'green')
 sampleRepo.list() # F571 will be listed with an id
 
@@ -62,6 +62,7 @@ frr = ogr.components.create('Ferrari')
 frr.driver = "Alonso"
 
 print(frr.model, frr.pos, frr.topspeed, frr.topfuel)
+
 
 ogr.draw()
 

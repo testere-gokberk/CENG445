@@ -77,13 +77,13 @@ class Component(ABC):
     def unregister(type, cls):
         del cls._registry[type]
 
-
 class ComponentFactory(Component):
 
     def __init__(self):
         self._components = {}
         print("INSIDE INIT")
         print(self._components)
+        self.owner = None # the map that owns the obj
 
     def __getattr__(self, attr):
         return super().__getattr__(attr)
@@ -99,13 +99,16 @@ class ComponentFactory(Component):
         return super().type()
     def create(self, type):
         obj = super().create(type=type)
+
+        if isinstance(obj, Car):
+            obj.map = self.owner
+
         print("INSIDE CREATE")
         print(type)
         print(obj)
         print(self._components)
         self._components[type] =  obj
         return obj
-
 
 
 class Cell(Component):
@@ -321,7 +324,7 @@ class StraightCell(Cell):
 
 class Car(Component):
 
-    def __init__(self, model:str, map, driver:str, pos:tuple, angle:int, topspeed:int, topfuel:int, speed:float, fuel:float):
+    def __init__(self, model:str, map, driver:str, pos:tuple = (0,0), angle:int=0, topspeed:int=100, topfuel:int=100, speed:float=0.0, fuel:float=100.0):
 
         super().__init__()
         self.model = model
@@ -340,6 +343,17 @@ class Car(Component):
         self.turnLeftFlag = False
         self.turnRightFlag = False
 
+    def attrs(self):
+
+        attr_list = [(attr, type(value)) for attr, value in vars(self).items()]
+        return attr_list
+    
+    def desc(self):
+        return "Default car."
+
+    def type(self):
+        return type(self)
+
     def start(self):
         self.carStarted = True
 
@@ -355,9 +369,8 @@ class Car(Component):
     def left(self):
         self.turnLeftFlag = True
     
-    def right(self):
+    def right(self):        
         self.turnRightFlag = True
-
     def tick(self):
         ## get components and interact
         
@@ -372,10 +385,10 @@ class Car(Component):
                 for cell in self.map.cells[row][col]:
                     cell.interact(self, self.pos[0] % self.map.cellsize, self.pos[1] % self.map.cellsize)  
 
-            ## assume tick per second
-
+            ## assume tick per  0.1 second
+                    
             if self.turnLeftFlag:
-                self.turnLeftFlag = False
+                self.turnLeftFlag = False   
                 self.angle += 90
                 if self.angle >=360:
                     self.angle -= 360
@@ -388,7 +401,7 @@ class Car(Component):
             def get_acceleration(speed,  max_accel=30, decay_rate=0.015):
                     if speed >= self.topspeed:
                         return 0  # Acceleration is 0 at or beyond max_speed
-                    accel = max_accel * math.exp(-decay_rate * speed)
+                    accel = (max_accel * math.exp(-decay_rate * speed)) / 10
                     return accel  
                   
             if(self.accelFlag):
@@ -397,9 +410,9 @@ class Car(Component):
 
 
             if(self.breakFlag):
-                self.speed -= 10    
+                self.speed -= 2 
 
-            distance = self.speed ## assuming tick per second
+            distance = self.speed /10 ## assuming tick per 0.1 second
             if self.fuel < ((distance / 100 ) * (self.speed / 100)): ## not enough fuel, go till zero, set fuel to zero
                 distance = (self.fuel / ((distance / 100 ) * (self.speed / 100))) * distance
                 self.fuel = 0 
@@ -483,13 +496,21 @@ class Car(Component):
             self.breakFlag = False
             self.turnLeftFlag = False
             self.turnRightFlag = False
-        
 
+
+
+            
 class Ferrari(Car):
 
-    def __init__(self, model="Ferrari", map=None, driver=None, pos=None, angle=0, topspeed=100, topfuel=100, speed=0.0, fuel=100):
+    def __init__(self, model="Ferrari", map=None, driver=None, pos=(0,0), angle=0, topspeed=250, topfuel=100, speed=0.0, fuel=100):
         super().__init__(model, map, driver, pos, angle, topspeed, topfuel, speed, fuel)
-    
+
+        print ( "POS OF THE FERRRARI ", self.pos)
     def draw(self):
 
         print("🏎️", end="")
+
+    def desc(self):
+        return "Ferrari, sports car."
+
+

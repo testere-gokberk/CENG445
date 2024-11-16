@@ -35,3 +35,28 @@ for i in range(9):
     eren[(i, 9)].rotation = 3
 
 eren.draw()
+
+frr = eren.components.create('Ferrari')
+frr.driver = "eren"
+
+frr.start()
+
+eren.components.list()
+
+print("REPO LIST")
+sampleRepo.list()
+
+print("TESTING VIEW")
+view = eren.view(0,0,400,400)
+
+view[(1,1)] = sampleRepo.components.create("booster")
+
+view.draw()
+
+
+eren.draw()
+
+    
+frr.tick()
+
+eren.draw()
