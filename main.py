@@ -25,7 +25,7 @@ for j in range(2,8):
     ogr[(1,j)].rotation = 0
 
 
-ogr.draw()
+##ogr.draw()
 
 dt = sampleRepo.components.create('turn90')
 dt.rotation = 1
@@ -56,32 +56,147 @@ ogr[(0,8)] = sampleRepo.components.create('rock')
 ogr[(1,0)] = sampleRepo.components.create('rock')
 ogr[(7,1)] = sampleRepo.components.create('fuel')
 
-ogr.draw()
-print("COMPONENT LIST")
-print(sampleRepo.components.list())
+##ogr.draw()
+##print("COMPONENT LIST")
+##print(sampleRepo.components.list())
 
 
 frr = ogr.components.create('Ferrari')
 frr.driver = "Alonso"
+frr.angle = 0
+frr.speed = 50
 
-print(frr.model, frr.pos, frr.topspeed, frr.topfuel)
+##print(frr.model, frr.pos, frr.topspeed, frr.topfuel)
 
 ogr.draw()
 
 cv = ogr.view(500,500,200,200)
-cv.draw()
+##cv.draw()
 
 frr.start()
 frr.tick()
 frr.accel()
-frr.left()
+frr.tick()
+frr.accel()
+frr.tick()
+frr.accel()
+frr.tick()
+frr.accel()
 frr.tick()
 frr.right()
-frr.accell()
+
+
 frr.tick()
+<<<<<<< Updated upstream
 frr.stop()
 cv.draw()
 ogr.draw()"""
 
+=======
+frr.tick()
+frr.tick()
+frr.tick()
+frr.tick()
+frr.tick()
+frr.tick()
+frr.tick()
+frr.left()
+frr.tick()
+frr.tick()
+frr.left()
+frr.tick()
+frr.tick()
+frr.right()
+
+frr.tick()
+frr.tick()
+frr.tick()
+frr.tick()
+frr.tick()
+frr.left()
+frr.tick()
+frr.tick()
+frr.tick()
+frr.tick()
+frr.left()
+frr.tick()
+frr.tick()
+frr.tick()
+frr.tick()
+frr.tick()
+frr.tick()
+frr.tick()
+frr.tick()
+frr.tick()
+frr.tick()
+frr.tick()
+frr.tick()
+frr.left()
+frr.tick()
+frr.tick()
+frr.tick()
+frr.tick()
+
+
+
+
+
+
+
+
+"""frr.right()
+frr.tick()
+frr.tick()
+frr.tick()
+frr.tick()
+frr.tick()
+frr.tick()
+frr.tick()
+frr.tick()
+frr.tick()
+frr.tick()
+frr.tick()
+frr.tick()
+frr.tick()
+frr.tick()
+frr.tick()
+frr.tick()"""
+
+
+
+"""frr.left()
+frr.tick()
+frr.tick()
+frr.tick()
+frr.tick()
+frr.tick()
+frr.tick()
+frr.tick()
+frr.tick()"""
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ogr.draw()
+frr.stop()
+##cv.draw()
+##ogr.draw()
+>>>>>>> Stashed changes
 
 

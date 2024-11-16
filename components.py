@@ -202,7 +202,7 @@ class FuelCell(Cell):
 
     def interact(self, car, y:int, x:int):
         
-        car.fuel = 1.0
+        car.fuel = car.topfuel
 
     def desc(self):
         return "Fuel cell to refuel the cars."
@@ -221,7 +221,7 @@ class FrictionCell(Cell):
 
     def interact(self, car, y:int, x:int):
         
-        car.speed *= 0.9
+        car.speed *= 0.8
 
     def desc(self):
         return "Friction cell to slow the car down."
@@ -240,7 +240,7 @@ class ObstacleCell(Cell):
 
     def interact(self, car, y:int, x:int):
         
-        car.speed = 0
+        car.speed = (car.speed * 3) / 10
 
     def desc(self):
         return "Obstacke cell to stop the car."
@@ -254,8 +254,9 @@ class ObstacleCell(Cell):
 class SlipperyCell(Cell):
 
     def interact(self, car, y: int, x: int):
-        car.rotation += 1
-        car.rotation = random.choice([0, 1, 2, 3])
+        ##car.rotation += 1
+        ##car.rotation = random.choice([0, 1, 2, 3])
+        car.angle = random.choice([0,90,180,270])
 
     def desc(self):
         return "Slippery cell to change the direction"
@@ -274,11 +275,12 @@ class Turn90Cell(Cell):
 
     def interact(self, car, y:int, x:int):
         
-        car.angle += 90
-        car.angle = car.angle%360
+        ##car.angle += 90
+        ##car.angle = car.angle%360
+        car.speed = car.speed * 0.98
 
     def desc(self):
-        return "Change the direction of the car"        
+        return "Change the direction of the car" ## not now       
 
     def type(self):
         return "road"
@@ -302,7 +304,7 @@ class StraightCell(Cell):
 
     def interact(self, car, y:int, x:int):
         
-        pass
+        car.speed = car.speed * 0.98
 
     def desc(self):
         return "Straight cell, go straight ahead"     
@@ -367,7 +369,7 @@ class Car(Component):
             row = int(self.pos[0] // self.map.cellsize)
             col = int(self.pos[1] // self.map.cellsize)
             if not self.map.cells[row][col]:
-                self.speed = 5 ## set a minimum value
+                self.speed = 50 ## set a minimum value
             else:
                 for cell in self.map.cells[row][col]:
                     cell.interact(self, self.pos[0] % self.map.cellsize, self.pos[1] % self.map.cellsize)  
@@ -385,6 +387,7 @@ class Car(Component):
                 self.angle -= 90
                 if self.angle < 0:
                     self.angle += 360
+            
             def get_acceleration(speed,  max_accel=30, decay_rate=0.015):
                     if speed >= self.topspeed:
                         return 0  # Acceleration is 0 at or beyond max_speed
@@ -397,7 +400,11 @@ class Car(Component):
 
 
             if(self.breakFlag):
+<<<<<<< Updated upstream
                 self.speed -= 10    
+=======
+                self.speed = self.speed*0.85
+>>>>>>> Stashed changes
 
             distance = self.speed ## assuming tick per second
             if self.fuel < ((distance / 100 ) * (self.speed / 100)): ## not enough fuel, go till zero, set fuel to zero
@@ -405,6 +412,7 @@ class Car(Component):
                 self.fuel = 0 
             else:
                 self.fuel = self.fuel - ((distance / 100 ) * (self.speed / 100)) ## have enough fuel, reduce it
+<<<<<<< Updated upstream
 
             move(distance)
 
@@ -419,6 +427,9 @@ class Car(Component):
                 self.accelFlag = False
 
 
+=======
+            
+>>>>>>> Stashed changes
             def move(distance_to_travel):
                 
 
@@ -428,7 +439,7 @@ class Car(Component):
                 negativex = False
                 
                 
-                newy = self.speed * math.sin(math.radians(self.angle)) + self.pos[0]
+                newy = -self.speed * math.sin(math.radians(self.angle)) + self.pos[0]
                 newx = self.speed * math.cos(math.radians(self.angle)) + self.pos[1]
 
                 
@@ -478,6 +489,21 @@ class Car(Component):
 
                 if remaining_distance > 0:
                     move(remaining_distance)
+<<<<<<< Updated upstream
+=======
+            
+            move(distance)
+
+            if(self.breakFlag):
+                self.speed = self.speed*0.85
+                self.breakFlag = False
+
+            ## move it with average speed, then set normal speed
+
+            if(self.accelFlag):
+                self.speed += acceleration
+                self.accelFlag = False
+>>>>>>> Stashed changes
 
             self.accelFlag = False
             self.breakFlag = False
@@ -492,4 +518,12 @@ class Ferrari(Car):
     
     def draw(self):
 
+<<<<<<< Updated upstream
         print("🏎️", end="")
+=======
+        print("🏎️", end="")
+
+    def desc(self):
+        return "Ferrari, sports car."
+
+>>>>>>> Stashed changes
