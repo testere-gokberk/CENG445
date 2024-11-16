@@ -92,7 +92,7 @@ frr.stop()
 cv.draw()
 ogr.draw()"""
 
-=======
+
 frr.tick()
 frr.tick()
 frr.tick()
