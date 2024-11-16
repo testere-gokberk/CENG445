@@ -1,4 +1,6 @@
 from map import Map
+from components import Component
+from components import ComponentFactory
 
 class Repo:
 
@@ -7,22 +9,16 @@ class Repo:
         self.objects = dict()   # id - object pairs
         self.users = dict()     # userid - list of ids of objects attched 
         self.objowners = dict()   # id - list of userids who use the object
-        self.next_id = 1
-    def create(self, name: str, *args):
-       
-        obj_id = self.next_id
-        self.next_id += 1
+        self.components = ComponentFactory()
 
-        new_obj = Map(*args)  # args unpacks (cols, rows, cellsize, bgcolor) for Map constructor
-       
-        # Store the object in the repository with its unique ID and name
-        self.objects[obj_id] = (obj_id, new_obj)
-        self.objowners[obj_id] = []   # Initialize an empty list for tracking attached users
+    def create(self, *args):
 
-        return obj_id  # Return the unique ID for the created object
+        print(*args[1:])
+        self.objects[args[0]] = Map(*(args[1:]))
+
     def list(self):
 
-        return list(self.objects.items())
+        print(list(self.objects.items()))
 
     def listattached(self, user:str):
 
@@ -68,5 +64,5 @@ class Repo:
 
     def delete(self, id:int):
         
-        #anlamadım bunu
-        pass
+        del self.objects[id]
+        

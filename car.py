@@ -1,4 +1,4 @@
-from component import Component
+from components import Component
 import math
 
 class Car(Component):
@@ -55,10 +55,10 @@ class Car(Component):
                 for cell in self.map.cells[row][col]:
                     cell.interact(self, self.pos[0] % self.map.cellsize, self.pos[1] % self.map.cellsize)  
 
-            ## assume tick per second
-
+            ## assume tick per  0.1 second
+                    
             if self.turnLeftFlag:
-                self.turnLeftFlag = False
+                self.turnLeftFlag = False   
                 self.angle += 90
                 if self.angle >=360:
                     self.angle -= 360
@@ -71,7 +71,7 @@ class Car(Component):
             def get_acceleration(speed,  max_accel=30, decay_rate=0.015):
                     if speed >= self.topspeed:
                         return 0  # Acceleration is 0 at or beyond max_speed
-                    accel = max_accel * math.exp(-decay_rate * speed)
+                    accel = (max_accel * math.exp(-decay_rate * speed)) / 10
                     return accel  
                   
             if(self.accelFlag):
@@ -80,9 +80,9 @@ class Car(Component):
 
 
             if(self.breakFlag):
-                self.speed -= 10    
+                self.speed -= 2 
 
-            distance = self.speed ## assuming tick per second
+            distance = self.speed /10 ## assuming tick per 0.1 second
             if self.fuel < ((distance / 100 ) * (self.speed / 100)): ## not enough fuel, go till zero, set fuel to zero
                 distance = (self.fuel / ((distance / 100 ) * (self.speed / 100))) * distance
                 self.fuel = 0 

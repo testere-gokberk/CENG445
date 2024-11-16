@@ -1,84 +1,116 @@
-from cell import Cell
-from component import Component
-from car import Car
+import components
 
 class Map:
-    def __init__(self, cols: int, rows: int, cellsize: int, bgcolor: str):
+
+    def __init__(self, cols:int, rows:int, cellsize:int, bgcolor:str):
+        
         self.cols = cols
         self.rows = rows
         self.cellsize = cellsize
         self.bgcolor = bgcolor
-        # Initialize a 2D grid where each cell is a stack (list) to hold multiple components
-        self.cells = [[[] for _ in range(self.cols)] for _ in range(self.rows)]
-        self.components = dict()  # Dictionary to store component-object and position pairs
 
-    def __getitem__(self, pos: tuple):
-        """
-        Returns the top component at the specified grid position.
-        """
+        self.cells = [self.cols*[None] for _ in range(self.rows)]
+
+        for i in range(self.rows):
+            for j in range(self.cols):
+                self.cells[i][j] = []
+
+        self.components = components.ComponentFactory()# component, pos pairs
+
+    def __getitem__(self, pos:tuple):
+
         row, col = pos
-        if 0 <= row < self.rows and 0 <= col < self.cols:
-            if self.cells[row][col]:
-                return self.cells[row][col][-1]  # Return the top component
-            else:
-                return None  # No component at this position
-        else:
-            raise ValueError("Given index exceeds map size")
+        
+        try:
+            return self.cells[row][col][-1]
+        except IndexError:
+            raise "Given index exceeds map size"
 
-    def __setitem__(self, pos: tuple, component):
-        """
-        Adds a new component to the stack at the specified grid position.
-        """
+    def __setitem__(self, pos:tuple, component):
+
         row, col = pos
-        if 0 <= row < self.rows and 0 <= col < self.cols:
-            self.cells[row][col].append(component)  # Stack component on top
-        else:
-            raise ValueError("Given index exceeds map size")
+        self.cells[row][col].append(component)
 
-    def __delitem__(self, pos: tuple):
-        """
-        Removes the top component from the stack at the specified grid position.
-        """
+    def __del__(self, pos:tuple):
+
         row, col = pos
-        if 0 <= row < self.rows and 0 <= col < self.cols:
-            if self.cells[row][col]:
-                self.cells[row][col].pop()  # Remove the top component
-            else:
-                raise ValueError("No cell to delete at the given position")
-        else:
-            raise ValueError("Given index exceeds map size")
+        self.cells[row][col] = []
 
-    def getxy(self, y: int, x: int):
-        """
-        Returns the top component at the pixel position (y, x).
-        Use modulo operations to map pixels to grid cells.
-        """
-        row = y // self.cellsize
-        col = x // self.cellsize
-        if 0 <= row < self.rows and 0 <= col < self.cols:
-            if self.cells[row][col]:
-                return self.cells[row][col][-1]  # Return the top component
-            else:
-                return None  # No component at this position
-        else:
-            raise ValueError("Pixel position exceeds map size")
+    def getxy(self, y:int, x:int):
 
-    def place(self, obj, y: int, x: int):
-       
+        return self.cells[x%self.cellsize][y%self.cellsize][-1]
 
+    def place(self, obj, y:int, x:int):
 
-        car = Car("merso", self, "messi", (y,x), 0, 100, 100, 20, 100)
+        self.components[obj] = (x, y)
 
-        
-        ## needs to be added to components list if necessary
+    def view(self, y:int, x:int, height:int, width:int):
 
-        
-
-    def view(self, y: int, x: int, height: int, width: int):
-        
-        ## todo
+        return View(self, y, x, height, width)
 
     def draw(self):
         
-        ## todo
+        bar = "\n" +"----"*self.cols
+        for i in range(self.rows):
+
+            print(" | ", end="")
+            for j in range(self.cols):
+                
+                if len(self.cells[i][j]) > 0 and isinstance(self.cells[i][j][-1], components.Cell):
+
+                    self.cells[i][j][-1].draw()
+                    print(" | ", end="")
+                else:
+                    print("X", end="")
+                    print(" | ", end="")
+
+            
+            print(bar)
+
+   
+
+class View:
+    def __init__(self, parent_map, start_row, start_col, height, width):
+       
+
+        self.parent_map = parent_map
+        self.start_row = start_row // parent_map.cellsize
+        self.start_col = start_col // parent_map.cellsize
+        self.view_rows = height // parent_map.cellsize
+        self.view_cols = width // parent_map.cellsize
+
+    def __getitem__(self, pos):
+        row, col = pos
+        actual_row = self.start_row + row
+        actual_col = self.start_col + col
+        return self.parent_map[actual_row, actual_col]
+
+    def __setitem__(self, pos, component):
+        row, col = pos
+        actual_row = self.start_row + row
+        actual_col = self.start_col + col
+        self.parent_map[actual_row, actual_col] = component
+
+    def __delitem__(self, pos):
+        row, col = pos
+        actual_row = self.start_row + row
+        actual_col = self.start_col + col
+        del self.parent_map[actual_row, actual_col]
+
+    def draw(self):
         
+        bar = "\n" + "----" * self.view_cols
+        for i in range(self.view_rows):
+            print(" | ", end="")
+            for j in range(self.view_cols):
+                actual_row = self.start_row + i
+                actual_col = self.start_col + j
+                if len(self.parent_map.cells[actual_row][actual_col]) > 0 and isinstance(
+                    self.parent_map.cells[actual_row][actual_col][-1], components.Cell
+                ):
+                    self.parent_map.cells[actual_row][actual_col][-1].draw()
+                    print(" | ", end="")
+                else:
+                    print("X", end="")
+                    print(" | ", end="")
+            print(bar)
