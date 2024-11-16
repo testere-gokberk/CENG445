@@ -81,8 +81,6 @@ class ComponentFactory(Component):
 
     def __init__(self):
         self._components = {}
-        print("INSIDE INIT")
-        print(self._components)
         self.owner = None # the map that owns the obj
 
     def __getattr__(self, attr):
@@ -103,10 +101,6 @@ class ComponentFactory(Component):
         if isinstance(obj, Car):
             obj.map = self.owner
 
-        print("INSIDE CREATE")
-        print(type)
-        print(obj)
-        print(self._components)
         self._components[type] =  obj
         return obj
 
@@ -320,8 +314,6 @@ class StraightCell(Cell):
         else:
             print("|" , end="")
 
-
-
 class Car(Component):
 
     def __init__(self, model:str, map, driver:str, pos:tuple = (0,0), angle:int=0, topspeed:int=100, topfuel:int=100, speed:float=0.0, fuel:float=100.0):
@@ -407,6 +399,8 @@ class Car(Component):
             if(self.accelFlag):
                 acceleration = get_acceleration(self.speed) / 2
                 self.speed += acceleration
+                if self.speed > self.topspeed:
+                    self.speed = self.topspeed
 
 
             if(self.breakFlag):
@@ -496,17 +490,13 @@ class Car(Component):
             self.accelFlag = False
             self.breakFlag = False
             self.turnLeftFlag = False
-            self.turnRightFlag = False
+            self.turnRightFlag = False       
 
-
-
-            
 class Ferrari(Car):
 
     def __init__(self, model="Ferrari", map=None, driver=None, pos=(0,0), angle=0, topspeed=250, topfuel=100, speed=0.0, fuel=100):
         super().__init__(model, map, driver, pos, angle, topspeed, topfuel, speed, fuel)
 
-        print ( "POS OF THE FERRRARI ", self.pos)
     def draw(self):
 
         print("🏎️", end="")

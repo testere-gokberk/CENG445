@@ -61,8 +61,6 @@ print(sampleRepo.components.list())
 frr = ogr.components.create('Ferrari')
 frr.driver = "Alonso"
 
-print(frr.model, frr.pos, frr.topspeed, frr.topfuel)
-
 
 ogr.draw()
 
@@ -79,7 +77,7 @@ frr.accel()
 frr.left()
 frr.tick()
 frr.right()
-frr.accell()
+frr.accel()
 frr.tick()
 frr.stop()
 cv.draw()

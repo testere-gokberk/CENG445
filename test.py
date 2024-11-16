@@ -61,7 +61,9 @@ eren.draw()
 print("REPO COMPONENTS")
 sampleRepo.components.list()
 
-
-frr.tick()
-
-eren.draw()
+for _ in range(20,):
+    
+    frr.accel()
+    frr.tick()
+    eren.draw()
+    print("**********************************************")

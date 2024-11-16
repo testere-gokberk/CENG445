@@ -32,7 +32,7 @@ class Map:
         row, col = pos
         self.cells[row][col].append(component)
 
-    def __del__(self, pos:tuple):
+    def __delitem__(self, pos:tuple):
 
         row, col = pos
         self.cells[row][col] = []
@@ -53,11 +53,8 @@ class Map:
         
         cars = []
 
-        print("DRAWING")
-        print(self.components)
-        for component_name, component_obj in self.components._components.items():
+        for _, component_obj in self.components._components.items():
 
-            print(component_obj)
             if isinstance(component_obj, components.Car):
                 cars.append((component_obj, (int(component_obj.pos[0]/self.cellsize), int(component_obj.pos[1]/self.cellsize))))
 
@@ -88,6 +85,10 @@ class Map:
 
             
             print(bar)
+
+        for car in cars:
+            car = car[0]
+            print("Model: ", car.model, "Driver: ", car.driver, "Position: ", car.pos, "Speed: ", car.speed, "Fuel: ", car.fuel)
 
     def view(self, y, x, height, width):
 
