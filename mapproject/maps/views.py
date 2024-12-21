@@ -166,3 +166,46 @@ def delete_component(request):
             return render(request, 'maps/delete_component.html',context)
 
     return render(request, 'maps/delete_component.html', context)
+
+def rotate_component(request):
+    username = request.session.get('username', None)
+    map_id = request.session.get('map_id', None)
+
+    if not username:
+        return redirect('home')
+
+    context = {
+        'username_submitted': username is not None,
+        'username': username,
+        'map_id': map_id,
+    }
+
+    if request.method == 'POST':
+        component_id = request.POST.get('component_id')
+
+        if component_id:
+            response = tcp_client.send_rotate_to_server(username, map_id,'rotate', component_id)
+            context['response'] = response
+
+            return render(request, 'maps/rotate_component.html',context)
+
+    return render(request, 'maps/rotate_component.html', context)
+
+def save_repo(request):
+    username = request.session.get('username', None)
+    map_id = request.session.get('map_id', None)
+
+    if not username:
+        return redirect('home')
+
+    context = {
+        'username_submitted': username is not None,
+        'username': username,
+        'map_id': map_id,
+    }
+
+    if request.method == 'POST':  # When Save Repo button is clicked
+        response = tcp_client.send_save_to_server(username, map_id, 'save')
+        context['response'] = response  # Pass the response to the template
+
+    return render(request, 'maps/save_repo.html', context)

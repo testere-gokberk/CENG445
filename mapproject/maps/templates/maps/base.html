@@ -33,6 +33,13 @@
                     <li><a href="{% url 'create_map' %}" class="btn">Create New Map</a></li>
                     <li><a href="{% url 'create_component' %}" class="btn">Create Component</a></li>
                     <li><a href="{% url 'delete_component' %}" class="btn">Delete Component</a></li>
+                    <li><a href="{% url 'rotate_component' %}" class="btn">Rotate Component</a></li>
+                    <li>
+                        <form action="{% url 'save_repo' %}" method="POST" style="display: inline;">
+                            {% csrf_token %}
+                            <button type="submit" class="btn">Save Repo</button>
+                        </form>
+                    </li>
                 {% endif %}
             </ul>
         </nav>

@@ -218,6 +218,13 @@ class MapServer:
                     message = f"Component '{cell_id}' on map {attached_map_id} has been rotated. New rotation: {cell.rotation}."
                     self.notify_users_on_map(users_on_same_map, message)
 
+                    cell_data = self.repo.component_dict2[cell_id]
+                    cell_data[2] += 1
+                    if cell_data[2] == 4:
+                        cell_data[2] = 0
+
+                    self.repo.component_dict2[cell_id] = cell_data
+
                     return f"Cell '{cell_id}' rotated successfully. New rotation: {cell.rotation}\n"
 
 
