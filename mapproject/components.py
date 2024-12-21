@@ -7,12 +7,13 @@ import pickle
 class Component(ABC):
     id_counter = 0
     _registry = {"friction": "Friction cell slows the car down",
-                 "Booster": "Booster cell increases speed.",
-                 "Rock": "Stops the car",
-                 "Slippery": "Changes the angle",
+                 "booster": "Booster cell increases speed.",
+                 "rock": "Stops the car",
+                 "slippery": "Changes the angle",
                  "turn90": "Rotates the car",
                  "straight": "Goes straight",
                  "fuel": "Fuel cell to refuel the cars",
+                 "checkpoint": "sets new checkpoint score",
                  "Ferrari": "A sports car",
                  "Merso" : "A sports car"
                  }
@@ -233,7 +234,7 @@ class CheckpointCell(Cell):
 
 
     def desc(self):
-        return "Checkpoint cell to create a checkpoint."
+        return "sets new checkpoint score"
 
     def type(self):
         return "checkpoint"

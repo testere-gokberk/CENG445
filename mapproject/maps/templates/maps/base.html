@@ -31,8 +31,8 @@
                 <li><a href="{% url 'home' %}" class="btn">Home</a></li>
                 {% if username_submitted %}
                     <li><a href="{% url 'create_map' %}" class="btn">Create New Map</a></li>
-                    <!-- Create Component Button that redirects to /create_component -->
                     <li><a href="{% url 'create_component' %}" class="btn">Create Component</a></li>
+                    <li><a href="{% url 'delete_component' %}" class="btn">Delete Component</a></li>
                 {% endif %}
             </ul>
         </nav>

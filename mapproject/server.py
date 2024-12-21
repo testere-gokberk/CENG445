@@ -136,7 +136,7 @@ class MapServer:
                         component_id = self.repo.components.id_counter
                         new_component = map.components.create(component_type)
                         self.repo.component_dict[component_id] = new_component
-                        self.repo.component_dict2[component_id] = [0,0,component_type]
+                        self.repo.component_dict2[component_id] = [0,0,0,component_type]
 
                         users_on_same_map = [user for user, maps in self.repo.users.items() if attached_map_id in maps]
                         message = f"A new component of type '{component_type}' has been created on map {attached_map_id} with ID: {component_id}\n"
@@ -174,6 +174,12 @@ class MapServer:
                                 return f"{self.repo.component_dict2}"
                             except ValueError as e:
                                 return f"Error: {e}\n"
+                elif action == "map_size":
+                    obj_id = int(params[0])
+                    map =self.repo.objects[obj_id]
+                    x = [map.rows, map.cols,map.cellsize,map.bgcolor]
+                    return f"{x}\n"
+
 
                 elif action == "detach":
                     if len(params) != 1:
@@ -388,11 +394,13 @@ class MapServer:
                                                          attached_map_id in maps]
                                     # Send a notification to all users on the same map
                                     self.notify_users_on_map(users_on_same_map, message)
-
+                                    del self.repo.component_dict2[obj_id]
                                     del self.repo.component_dict[obj_id]
                                     return f"Component with ID {obj_id} deleted successfully.\n"
                                 else:
                                     return f"Error: Component with ID {obj_id} not found.\n"
+
+
                             except ValueError:
                                 return "Error: ID must be an integer for component.\n"
                         else:

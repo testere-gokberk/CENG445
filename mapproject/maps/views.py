@@ -26,9 +26,9 @@ def home(request):
 
     options = {
         "friction": "Friction cell slows the car down",
-        "Booster": "Booster cell increases speed.",
-        "Rock": "Stops the car",
-        "Slippery": "Changes the angle",
+        "booster": "Booster cell increases speed.",
+        "rock": "Stops the car",
+        "slippery": "Changes the angle",
         "turn90": "Rotates the car",
         "straight": "Goes straight",
         "fuel": "Fuel cell to refuel the cars",
@@ -48,9 +48,9 @@ def home(request):
 def some_view(request):
     options = {
         "friction": "Friction cell slows the car down",
-        "Booster": "Booster cell increases speed.",
-        "Rock": "Stops the car",
-        "Slippery": "Changes the angle",
+        "booster": "Booster cell increases speed.",
+        "rock": "Stops the car",
+        "slippery": "Changes the angle",
         "turn90": "Rotates the car",
         "straight": "Goes straight",
         "fuel": "Fuel cell to refuel the cars",
@@ -67,9 +67,9 @@ def create_map(request):
 
     options = {
         "friction": "Friction cell slows the car down",
-        "Booster": "Booster cell increases speed.",
-        "Rock": "Stops the car",
-        "Slippery": "Changes the angle",
+        "booster": "Booster cell increases speed.",
+        "rock": "Stops the car",
+        "slippery": "Changes the angle",
         "turn90": "Rotates the car",
         "straight": "Goes straight",
         "fuel": "Fuel cell to refuel the cars",
@@ -111,9 +111,9 @@ def create_component(request):
 
     options = {
         "friction": "Friction cell slows the car down",
-        "Booster": "Booster cell increases speed.",
-        "Rock": "Stops the car",
-        "Slippery": "Changes the angle",
+        "booster": "Booster cell increases speed.",
+        "rock": "Stops the car",
+        "slippery": "Changes the angle",
         "turn90": "Rotates the car",
         "straight": "Goes straight",
         "fuel": "Fuel cell to refuel the cars",
@@ -136,6 +136,33 @@ def create_component(request):
 
             response = tcp_client.send_component_to_server(username, map_id, selected_option, rows, cols)
 
+            context['response'] = response
+
             return render(request, 'maps/create_component.html', context)
 
     return render(request, 'maps/create_component.html', context)
+
+
+def delete_component(request):
+    username = request.session.get('username', None)
+    map_id = request.session.get('map_id', None)
+
+    if not username:
+        return redirect('home')
+
+    context = {
+        'username_submitted': username is not None,
+        'username': username,
+        'map_id': map_id,
+    }
+
+    if request.method == 'POST':
+        component_id = request.POST.get('component_id')
+
+        if component_id:
+            response = tcp_client.send_delete_to_server(username, map_id,'delete','component', component_id)
+            context['response'] = response
+
+            return render(request, 'maps/delete_component.html',context)
+
+    return render(request, 'maps/delete_component.html', context)
