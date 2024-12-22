@@ -98,8 +98,10 @@ class MapServer:
                     print("map created.\n")
                     if len(params) != 5:
                         return "Invalid command or missing parameters. Correct usage: create_map <id:int> <cols:int> <rows:int> <cellsize:int> <bgcolor:str>\n"
-                    print("map created.\n")
                     map_id = int(params[0])
+                    if map_id in self.repo.objects:
+                        return "Choose a unique map ID. This map ID already exists.\n"
+
                     cols = int(params[1])
                     rows = int(params[2])
                     cellsize = int(params[3])
@@ -110,7 +112,6 @@ class MapServer:
                     self.notify_users_on_map(affected_users, message)
 
                     self.repo.create(map_id, cols, rows, cellsize, bgcolor)
-                    print("map created.\n")
                     return "Map created successfully.\n"
 
                 elif action == "save":

@@ -95,7 +95,7 @@ def create_map(request):
         response = tcp_client.send_to_server(username, 'create_map', map_id, cols, rows, cellsize, bgcolor)
 
         context['map_id'] = map_id
-        context['message'] = f'Map {map_id} created successfully.'
+        context['response'] = response
 
     return render(request, 'maps/create_map_form.html', context)
 
