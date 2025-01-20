@@ -1,0 +1,265 @@
+{% extends 'maps/base.html' %}
+{% load static %}
+
+{% block content %}
+    
+    {% if not error and grid %}
+    <!--background-color: {{ color }}; -->
+
+  
+    {% endif %}
+
+
+    <div id="drag-items" style="margin: 20px; position: absolute; top: 5%; left: 15%; width: 15%; background-color: #f8f9fa; padding: 10px; border: 1px solid #ddd;">
+        
+        <h3>Component List</h3>
+        <img src="{% static 'maps/images/road_asphalt01.png' %}" draggable="true" style="width: 20%; margin-bottom: 10px;" />
+        <img src="{% static 'maps/images/road_asphalt41.png' %}" draggable="true" style="width: 20%; margin-bottom: 10px;" />
+        <img src="{% static 'maps/images/car_topview.svg' %}" draggable="true" style="width: 20%; margin-bottom: 10px;" />
+        <img src="{% static 'maps/images/rock.svg' %}" draggable="true" style="width: 20%; margin-bottom: 10px;" />
+        <img src="{% static 'maps/images/fuel.svg' %}" draggable="true" style="width: 20%; margin-bottom: 10px;" />
+        <img src="{% static 'maps/images/merso.svg' %}" draggable="true" style="width: 20%; margin-bottom: 10px;" />
+        <img src="{% static 'maps/images/checkpoint.png' %}" draggable="true" style="width: 20%; margin-bottom: 10px;" />
+        <img src="{% static 'maps/images/friction.svg' %}" draggable="true" style="width: 20%; margin-bottom: 10px;" />
+        <img src="{% static 'maps/images/slippery.png' %}" draggable="true" style="width: 20%; margin-bottom: 10px;" />
+    </div>
+
+    <div id="container" class="split right" style="background-color: rgba(17, 241, 167, 0.1); top: 5%; left: 50%;">
+    </div>
+    
+    <script>
+
+        const grid = {{ grid|safe }};
+        
+        console.log("GRID ", grid);
+
+        var stage = new Konva.Stage({
+            container: 'container',
+            width: window.innerWidth * 0.6,
+            height: window.innerHeight * 0.8,
+        });
+        
+        var layer = new Konva.Layer();
+        stage.add(layer);
+        
+        console.log("GTERJHRYTJSDRYJSRYJ");
+        console.log("GTERJHRYTJSDRYJSRYJ");
+        console.log("GTERJHRYTJSDRYJSRYJ");
+        console.log("GTERJHRYTJSDRYJSRYJ");
+
+        var rows = {{grid|length}}; 
+        var cols = {{grid.0|length}};
+
+        //rows = 10;
+        //cols = 10;
+    
+        console.log("ROWS ", rows);
+        console.log("cols ", cols);
+
+        var cellWidth = stage.width() / cols; 
+
+        console.log("cellWidth ", cellWidth);   
+
+        cellWidth *= 0.8;
+
+        var cellHeight = stage.height() / rows;
+
+        for (let i = 0; i < rows; i++) 
+        {
+            for (let j = 0; j < cols; j++) 
+            {
+                var cell = new Konva.Rect({
+                    x: j * cellWidth,
+                    y: i * cellHeight,
+                    width: cellWidth,
+                    height: cellHeight,
+                    fill: 'transparent',
+                    stroke: 'gray', 
+                    strokeWidth: 1,
+                });
+                
+                layer.add(cell);
+
+                const imageObj = new Image();
+
+                if(grid[i][j])
+                {
+                    let imageObj = new Image();
+                    imageObj.onload = function () {
+                      const konvaImage = new Konva.Image({
+                        x: j * cellWidth,
+                        y: i * cellHeight,
+                        width: cellWidth,
+                        height: cellHeight,
+                        image: imageObj,
+                      });
+                      layer.add(konvaImage);
+                      layer.draw();
+                    };
+                    imageObj.src = grid[i][j];
+                }
+
+            }
+        }
+
+        layer.batchDraw();
+
+        var item_name = '';
+
+        document.getElementById('drag-items').addEventListener('dragstart', function (e) {
+            item_name = e.target.src;
+        });
+
+        var con = stage.container();
+        con.addEventListener('dragover', function (e) 
+        {
+            e.preventDefault();
+        });
+
+        con.addEventListener('drop', function (e) 
+        {
+            e.preventDefault();
+            stage.setPointersPositions(e);
+        
+            const pointerPos = stage.getPointerPosition();
+
+            if (!pointerPos) 
+                return;
+
+            const nearestX = Math.floor(pointerPos.x / cellWidth) * cellWidth;
+            const nearestY = Math.floor(pointerPos.y / cellHeight) * cellHeight;
+        
+            Konva.Image.fromURL(item_name, function (image) {
+                
+                layer.add(image);
+
+                image.position({
+                    x: nearestX, 
+                    y: nearestY, 
+                });
+
+                image.width(cellWidth );
+                image.height(cellHeight );
+                image.draggable(false); 
+                layer.batchDraw();
+
+
+                console.log("INSIDE DROP HANDLER");
+
+                fetch('/api/item-dropped/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        //'X-CSRFToken': getCSRFToken(), 
+                    },
+                    body: JSON.stringify({
+                        x: nearestX/cellWidth,
+                        y: nearestY/cellHeight,
+                        item_name: item_name,
+                    }),
+                })
+                    .then((response) => {
+                        if (!response.ok) {
+                            throw new Error('AOK');
+                        }
+                        return response.json();
+                    })
+                    .then((data) => {
+                        console.log('BACKEND RESPONSE:', data);
+                    })
+                    .catch((error) => {
+                        console.error('ERROR: ', error);
+                    });
+            });
+
+        });
+
+        
+    </script>
+
+    <style>
+
+        #drag-items img {
+            cursor: pointer;
+        }
+
+        #container {
+            border: 2px;
+            background-color:rgb(0, 255, 81);
+            width: 100%; 
+            height: 100%;
+            position: relative;
+            overflow: hidden; 
+            width: 60vw;
+            height: 80vh;
+            max-width: 100%;
+            max-height: 90%;
+            left: %50%;
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 8px 12px;
+            background-color: #007bff;
+            color: white;
+            text-decoration: none;
+            cursor: pointer;
+            font-size: 14px;
+            margin-right: 10px;
+        }
+
+        .btn:hover {
+            background-color: #0056b3;
+        }
+
+        .button-container {
+            margin-top: 15px;
+            text-align: center;
+        }
+
+        .grid-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .grid-cell {
+            width: 50px;
+            height: 50px;
+            text-align: center;
+            border: 1px solid #000;
+        }
+
+        .grid-cell img {
+            max-width: 100%;
+            max-height: 100%;
+        }
+
+        .grid-container {
+            padding: 10px;
+        }
+
+        .success-message {
+            padding: 10px;
+            background-color: #28a745;
+            color: white;
+            margin-top: 15px;
+            text-align: center;
+        }
+
+        .error-message {
+            padding: 10px;
+            background-color: #dc3545;
+            color: white;
+            margin-top: 15px;
+            text-align: center;
+        }
+
+        header nav ul li a.btn {
+            padding: 10px 15px;
+            font-size: 14px;
+            margin: 5px;
+        }
+
+    </style>
+
+{% endblock %}

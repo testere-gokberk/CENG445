@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    {% load static %}
+    <script src="https://unpkg.com/konva@9.3.18/konva.min.js"></script> 
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Map Project{% endblock %}</title>
+    <link rel="stylesheet" href="{% static 'styles.css' %}">
+    <style>
+        .btn {
+            display: inline-block;
+            padding: 10px 15px;
+            margin: 5px;
+            background-color:rgb(255, 0, 0);
+            color: white;
+            text-decoration: none;
+        }
+
+        .split {
+            height: 100%;
+            width: 50%;
+            position: fixed;
+            z-index: 1;
+            top: 0;
+            overflow-x: hidden;
+            padding-top: 20px;
+        }
+          
+        .left {
+            left: 0;
+        }
+          
+        .right {
+        right: 0;
+        
+        }
+          
+        .username-form {
+            margin: 20px 0;
+            width: 50%; 
+            padding: 20px;
+            left: 0;
+
+        }
+
+        #container {
+            width: 100%; 
+            height: 100%;
+          }
+      
+
+    </style>
+</head>
+
+
+<body>
+
+    <script src="https://unpkg.com/konva@9.3.18/konva.min.js"></script> 
+
+    <header>
+        <nav>
+            <ul>
+                <li><a href="{% url 'home' %}" class="btn">Home</a></li>
+                {% if username_submitted %}
+                    <li><a href="{% url 'create_map' %}" class="btn">Create New Map</a></li>
+                    <li><a href="{% url 'create_component' %}" class="btn">Create Component</a></li>
+                    <li><a href="{% url 'list_maps' %}" class="btn">List Maps</a></li>
+                    <li><a href="{% url 'view_map' %}" class="btn">View Attached Map</a></li>
+                    <li><a href="{% url 'delete_component' %}" class="btn">Delete Component</a></li>
+                    <li><a href="{% url 'rotate_component' %}" class="btn">Rotate Component</a></li>
+                    
+                    <li>
+                        <form action="{% url 'save_repo' %}" method="POST" style="display: inline;">
+                            {% csrf_token %}
+                            <button type="submit" class="btn">Save Repo</button>
+                        </form>
+                    </li>
+
+                {% endif %}
+            </ul>
+        </nav>
+    </header>
+
+    <main>
+        <div class="username-form">
+            {% if not username_submitted %}
+                <form id="username-form" method="POST">
+                    {% csrf_token %}
+                    <label for="username">Enter your username:</label>
+                    <input type="text" id="username" name="username" required>
+                    <button type="submit" class="btn">Submit</button>
+                </form>
+            {% else %}
+                <p>Logged in as: {{ username }}</p>
+                <form action="{% url 'logout' %}" method="POST">
+                    {% csrf_token %}
+                    <button type="submit" class="btn">Logout</button>
+                </form>
+            {% endif %}
+        </div>
+
+        <div class="split right">
+            <div id="container"></div>
+
+        </div>
+
+        {% block content %}
+        {% endblock %}
+    </main>
+
+    <script>
+        
+        /*setInterval(() => {
+            if (window.location.pathname === "{% url 'view_map' %}") {
+                window.location.href = "{% url 'view_map' %}";
+            }
+        }, 5000);
+        */
+    </script>
+    
+  
+    <script>
+        /*
+        var container = document.getElementById('container');
+        var width = container.offsetWidth;
+        var height = container.offsetHeight;
+  
+        var stage = new Konva.Stage({
+          container: 'container',
+          width: width,
+          height: height,
+        });
+  
+        var layer = new Konva.Layer();
+        var rectX =  stage.width() / 2 - 50;
+        var rectY = stage.height() / 2 - 25;
+  
+        var box = new Konva.Rect({
+          x: rectX,
+          y: rectY,
+          width: 100,
+          height: 50,
+          fill: '#00D2FF',
+          stroke: 'black',
+          strokeWidth: 4,
+          draggable: true,
+        });
+  
+        box.on('mouseover', function () {
+          document.body.style.cursor = 'pointer';
+        });
+
+        box.on('mouseout', function () {
+          document.body.style.cursor = 'default';
+        });
+  
+        layer.add(box);
+        stage.add(layer);
+        */
+    </script>
+
+
+</body>
+</html>
+
