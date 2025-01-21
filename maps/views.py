@@ -283,7 +283,7 @@ def list_maps(request):
     
     #response = tcp_client.
     
-    response = tcp_client.send_to_server(username, "list_maps")
+    response = tcp_client.send_listmaps_to_server(username, "list_maps") #response = tcp_client.send_to_server(username, "list_maps")
     response_json = json.loads(response)
     
     print("RESPONSE", response)
@@ -507,38 +507,44 @@ def item_dropped(request):
         "friction":"friction",
         "merso":"merso",
     }
-
-    if request.method == 'POST':
-        
-        data = json.loads(request.body)
-        x = data.get('x')
-        y = data.get('y')
-        rotation = data.get("rotation")
-        item_name = data.get('item_name')
-        
-        item_name = parse_url(item_name)
-        
-        print(f"ITEM DROPPED {x} {y} name {item_name}, with rotation {rotation}")
-        print("ADDING DROPPED COMPONENT ", username, item_name, x, " " ,y)
-        
-        response = tcp_client.send_component_to_server(username, map_id, url_2_image[item_name], y, x)
-        # urlleri item adına dönüştür
-        response_json = json.loads(response)
-        print("DROP RESPONSE ", response_json)
     
-        comp_id = response_json["component_id"]
-    
-        rotation = rotation//90
-    
-        for i in range(rotation):
-            response = tcp_client.send_rotate_to_server(username, map_id, "rotate", comp_id)
+    try:
+        if request.method == 'POST':
+            
+            data = json.loads(request.body)
+            x = data.get('x')
+            y = data.get('y')
+            rotation = data.get("rotation")
+            item_name = data.get('item_name')
+            
+            item_name = parse_url(item_name)
+            
+            print(f"ITEM DROPPED {x} {y} name {item_name}, with rotation {rotation}")
+            print("ADDING DROPPED COMPONENT ", username, item_name, x, " " ,y)
+            
+            response = tcp_client.send_component_to_server(username, map_id, url_2_image[item_name], y, x)
+            # urlleri item adına dönüştür
             response_json = json.loads(response)
-            print("ROTATE RESPONSE ", response_json)
+            print("DROP RESPONSE ", response_json)
         
+            comp_id = response_json["component_id"]
         
-        return JsonResponse({'status': 'success'})
-    
-    return JsonResponse({'status': 'error'}, status=400)
+            rotation = rotation//90
+        
+            for i in range(rotation):
+                response = tcp_client.send_rotate_to_server(username, map_id, "rotate", comp_id)
+                response_json = json.loads(response)
+                print("ROTATE RESPONSE ", response_json)
+            
+            
+            return JsonResponse({'status': 'success'})
+        
+        return JsonResponse({'status': 'error'}, status=400)
+    except Exception as e:
+        return JsonResponse({'status': 'error', 'message': str(e)}, status=400)
+    finally:
+        pass
+
 
 @csrf_exempt
 def delete_item(request):

@@ -122,41 +122,41 @@ def send_to_server(username: str, command: str, *args) -> str:
             "status": "error",
             "message": f"Communication error: {str(e)}"
         })
+
 def send_listmaps_to_server(username: str, command: str, *args) -> str:
     if not username:
         return json.dumps({"status": "error", "message": "Username is required"})
 
     try:
+        # Create a new independent connection
         wsock = create_websocket_connection()
         if not wsock:
             return json.dumps({"status": "error", "message": "Could not connect to server"})
 
-        initial_msg = wsock.recv()
-        wsock.send(json.dumps({"username": username}))
-        welcome_msg = wsock.recv()
+        try:
+            initial_msg = wsock.recv()
+            wsock.send(json.dumps({"username": "temporary"}))
+            welcome_msg = wsock.recv()
 
-        command_msg = {
-            "command": command.lower().replace(" ", "_"),
-            "params": list(args)
-        }
-        wsock.send(json.dumps(command_msg))
-        response = wsock.recv()
+            command_msg = {
+                "command": command.lower().replace(" ", "_"),
+                "params": list(args)
+            }
+            wsock.send(json.dumps(command_msg))
+            response = wsock.recv()
 
-        wsock.close()
+            return ensure_json_response(response)
 
-        return ensure_json_response(response)
-
-    except Exception as e:
-        return json.dumps({
-            "status": "error",
-            "message": f"Communication error: {str(e)}"
-        })
+        finally:
+            # Always close this independent connection
+            wsock.close()
 
     except Exception as e:
         return json.dumps({
             "status": "error",
             "message": f"Communication error: {str(e)}"
         })
+
 
 def send_component_to_server(username: str, map_id: str, component: str, row: str, col: str) -> str:
     if not map_id:
@@ -174,7 +174,7 @@ def send_component_to_server(username: str, map_id: str, component: str, row: st
 
         create_command = {
             "command": "create",
-            "params": [component]
+            "params": [component, row, col]
         }
         wsock.send(json.dumps(create_command))
         create_response = json.loads(message_queue.get())
@@ -207,6 +207,35 @@ def send_component_to_server(username: str, map_id: str, component: str, row: st
         return json.dumps({
             "status": "error",
             "message": f"Error: {str(e)}"
+        })
+
+
+def send_command_to_server(username: str, command: str, *args) -> str:
+    if not username:
+        return json.dumps({"status": "error", "message": "Username is required"})
+
+    try:
+        wsock, message_queue, stop_event = maintain_connection(username, args[0] if args else "default")
+
+        command_msg = {
+            "command": command.lower().replace(" ", "_"),
+            "params": list(args)
+        }
+        wsock.send(json.dumps(command_msg))
+        response = message_queue.get()
+
+        return ensure_json_response(response)
+
+    except Exception as e:
+        return json.dumps({
+            "status": "error",
+            "message": f"Communication error: {str(e)}"
+        })
+
+    except Exception as e:
+        return json.dumps({
+            "status": "error",
+            "message": f"Communication error: {str(e)}"
         })
 
 

@@ -37,19 +37,17 @@ class MapServer:
     def handle_client(self, wsock):
         username = None
         try:
-            # Initial connection handling
             wsock.send(json.dumps({
                 "status": "request",
                 "message": "Enter username:"
             }))
 
-            # Get username
             msg = wsock.recv()
             try:
                 data = json.loads(msg)
                 username = data.get("username", "").strip()
             except json.JSONDecodeError:
-                username = msg.strip()  # Fallback for plain text
+                username = msg.strip()  
 
             if not username:
                 wsock.send(json.dumps({
@@ -110,11 +108,48 @@ class MapServer:
                     attached_map_id = attached_maps[0]
                     map_object = self.repo.objects[attached_map_id]
 
-                    # Check if the map is in game mode
-                    if map_object.game_active and command != "stop":
+                    if map_object.game_active and (command != "stop" or command != "left" or command != "right" or command != "accel" or command != "break_"):
                         return {"status": "error", "message": "First stop the game mode."}
 
-                if command == "create_map":
+                if command == "left":
+
+                    map = self.repo.objects[attached_map_id]
+
+                    for objs in map.objects:
+                        if isinstance(objs, Car):
+                            if (objs.driver == username):
+                                objs.left()
+                                break
+                    return {"status": "success", "message": f"Car {objs.id} turned left"}
+
+                elif command == "right":
+                    map = self.repo.objects[attached_map_id]
+                    for objs in map.objects:
+                        if isinstance(objs, Car):
+                            if (objs.driver == username):
+                                objs.right()
+                                break
+                    return {"status": "success", "message": f"Car {objs.id} turned right"}
+
+                elif command == "accel":
+                    map = self.repo.objects[attached_map_id]
+                    for objs in map.objects:
+                        if isinstance(objs, Car):
+                            if (objs.driver == username):
+                                objs.accel()
+                                break
+                    return {"status": "success", "message": f"Car {objs.id} accelerated"}
+
+                elif command == "break_":
+                    map = self.repo.objects[attached_map_id]
+                    for objs in map.objects:
+                        if isinstance(objs, Car):
+                            if (objs.driver == username):
+                                objs.accel()
+                                break
+                    return {"status": "success", "message": f"Car {objs.id} breaked"}
+
+                elif command == "create_map":
                     if len(params) != 5:
                         return {"status": "error",
                                 "message": "Invalid parameters. Usage: create_map <id:int> <cols:int> <rows:int> <cellsize:int> <bgcolor:str>"}
@@ -138,21 +173,37 @@ class MapServer:
                     except:
                         return {"status": "error", "message": "First attach a map"}
 
-                    if len(params) != 1:
-                        return {"status": "error",
-                                "message": "Invalid parameters. Usage: create <component_type>"}
 
                     map = self.repo.objects[attached_map_id]
                     component_type = params[0]
 
+                    if component_type == 'Ferrari' or component_type == 'Merso':
+                        for objs in map.objects:
+                            if isinstance(objs, Car):
+                                if (objs.driver == username):
+                                    return {"status": "error",
+                                            "message": f"You are already driving car : {objs.id}"}
+
+                    rows = int(params[1])
+                    cols = int(params[2])
+                    x = rows * map.cellsize + map.cellsize / 2
+                    y = cols * map.cellsize + map.cellsize / 2
+
                     try:
                         new_component = map.components.create(component_type)
+                        if component_type == 'Ferrari' or component_type == 'Merso':
+                            new_component.driver = username
+                            new_component.pos = (x, y)
                         component_id = new_component.id
 
-                        users_on_same_map = [user for user, maps in self.repo.users.items()
-                                             if attached_map_id in maps]
+                        users_on_same_map = [
+                            user for user, maps in self.repo.users.items()
+                            if maps and maps[-1] == attached_map_id
+                        ]
+                        
                         ##notify_msg = f"New component of type '{component_type}' created on map {attached_map_id} with ID: {component_id}"
                         ##self.notify_users_on_map(users_on_same_map, notify_msg)
+
                         return {"status": "success",
                                 "message": str(new_component.id),
                                 "component_id": new_component.id}
@@ -192,8 +243,12 @@ class MapServer:
                                 "message": f"Invalid position. Row must be between 0 and {rowcount - 1}, col between 0 and {colcount - 1}"}
 
                     map[(row, col)] = comp
-                    users_on_same_map = [user for user, maps in self.repo.users.items()
-                                         if attached_map_id in maps]
+                    
+                    users_on_same_map = [
+                        user for user, maps in self.repo.users.items()
+                        if maps and maps[-1] == attached_map_id
+                    ]
+                    
                     notify_msg = {"status": "notification", "message": f"Component '{component_id}' placed at ({row}, {col}) on map {attached_map_id}", "component_id" : component_id,"row" : row, "col" : col}
                     self.notify_users_on_map(users_on_same_map, notify_msg)
 
@@ -226,8 +281,13 @@ class MapServer:
                     cell.rotation = (cell.rotation + 1) % 4
 
                     attached_map_id = self.repo.listattached(username)[0]
-                    users_on_same_map = [user for user, maps in self.repo.users.items()
-                                         if attached_map_id in maps]
+                    
+                    users_on_same_map = [
+                        user for user, maps in self.repo.users.items()
+                        if maps and maps[-1] == attached_map_id
+                    ]
+
+                    
                     notify_msg = {"status": "notification","message":f"Component '{cell_id}' rotated. New rotation: {cell.rotation}"}
                     self.notify_users_on_map(users_on_same_map, notify_msg)
 
@@ -274,8 +334,13 @@ class MapServer:
                                 "message": "You must attach to a map first"}
 
                     attached_map_id = attached_maps[-1]
-                    users_on_same_map = [user for user, maps in self.repo.users.items()
-                                         if attached_map_id in maps]
+                    
+                    users_on_same_map = [
+                        user for user, maps in self.repo.users.items()
+                        if maps and maps[-1] == attached_map_id
+                    ]
+                    
+                    
                     notify_msg = {"status": "notification", "message":f"{username} started game mode on map {attached_map_id}"}
                     self.notify_users_on_map(users_on_same_map, notify_msg)
 
@@ -303,8 +368,12 @@ class MapServer:
                     map = self.repo.objects[attached_map_id]
                     map.game_active = False
 
-                    users_on_same_map = [user for user, maps in self.repo.users.items()
-                                         if attached_map_id in maps]
+                    users_on_same_map = [
+                        user for user, maps in self.repo.users.items()
+                        if maps and maps[-1] == attached_map_id
+                    ]
+                    
+                    
                     notify_msg = {"status": "notification",
                                   "message": f"{username} stopped game mode on map {attached_map_id}"}
                     self.notify_users_on_map(users_on_same_map, notify_msg)
@@ -367,9 +436,12 @@ class MapServer:
 
                                     message = {"status": "notification", "message": f"{username} has deleted Component {obj_id}."}
 
-                                    users_on_same_map = [user for user, maps in self.repo.users.items() if
-                                                         attached_map_id in maps]
-                                    # Send a notification to all users on the same map
+                                    users_on_same_map = [
+                                        user for user, maps in self.repo.users.items()
+                                        if maps and maps[-1] == attached_map_id
+                                    ]
+
+                                    
                                     self.notify_users_on_map(users_on_same_map, message)
 
                                     for o in map.objects:
