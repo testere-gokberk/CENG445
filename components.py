@@ -10,7 +10,7 @@ class Component(ABC):
                  "Booster": "Booster cell increases speed.",
                  "Rock": "Stops the car",
                  "Slippery": "Changes the angle",
-                 "turn90": "Rotates the car",
+                 "turn": "Rotates the car",
                  "straight": "Goes straight",
                  "fuel": "Fuel cell to refuel the cars",
                  "Ferrari": "A sports car",
@@ -63,7 +63,7 @@ class Component(ABC):
             return ObstacleCell()
         elif type == "slippery":
             return SlipperyCell()
-        elif type == "turn90":
+        elif type == "turn":
             return Turn90Cell()
         elif type == "straight":
             return StraightCell()

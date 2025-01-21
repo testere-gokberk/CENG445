@@ -14,7 +14,7 @@ urlpatterns = [
     path('rotate_component/', views.rotate_component, name='rotate_component'),  
     path('save_repo/', views.save_repo, name='save_repo'),  
     path('delete_component/', views.delete_component, name='delete_component'),  
-    
     path('api/item-dropped/', views.item_dropped, name='item_dropped'),
+    path('api/delete-item/', views.delete_item, name='delete_item'),
 
 ]

@@ -22,16 +22,27 @@
         <img src="{% static 'maps/images/checkpoint.png' %}" draggable="true" style="width: 20%; margin-bottom: 10px;" />
         <img src="{% static 'maps/images/friction.svg' %}" draggable="true" style="width: 20%; margin-bottom: 10px;" />
         <img src="{% static 'maps/images/slippery.png' %}" draggable="true" style="width: 20%; margin-bottom: 10px;" />
+    
+        <button id="delete-btn" style="margin-top: 20px; padding: 8px 12px; background-color: #dc3545; color: white; border: none; cursor: pointer;">
+            Delete Selected
+        </button>
+    
+
     </div>
 
-    <div id="container" class="split right" style="background-color: rgba(17, 241, 167, 0.1); top: 5%; left: 50%;">
-    </div>
-    
     <script>
 
+        //var bg_color = {{color|safe}};
+        //document.documentElement.style.setProperty('--color', bg_color);  
+
+
         const grid = {{ grid|safe }};
-        
+        const rot_grid = {{rot_grid|safe}};
         console.log("GRID ", grid);
+
+        let selectedCell = { row: -1, col: -1 };
+
+        console.log("ROT ", rot_grid);
 
         var stage = new Konva.Stage({
             container: 'container',
@@ -41,29 +52,81 @@
         
         var layer = new Konva.Layer();
         stage.add(layer);
-        
-        console.log("GTERJHRYTJSDRYJSRYJ");
-        console.log("GTERJHRYTJSDRYJSRYJ");
-        console.log("GTERJHRYTJSDRYJSRYJ");
-        console.log("GTERJHRYTJSDRYJSRYJ");
-
+    
         var rows = {{grid|length}}; 
         var cols = {{grid.0|length}};
-
-        //rows = 10;
-        //cols = 10;
     
         console.log("ROWS ", rows);
         console.log("cols ", cols);
 
         var cellWidth = stage.width() / cols; 
-
         console.log("cellWidth ", cellWidth);   
-
         cellWidth *= 0.8;
 
         var cellHeight = stage.height() / rows;
 
+        let item_name = '';
+        let item_rotation = 0;
+        
+        layer.on('click', (e) => {
+            if (e.target instanceof Konva.Image) {
+                const col = e.target.getAttr('gridCol');                 ;
+                const row =  e.target.getAttr('gridRow');
+                
+                if (col >= 0 && col < cols && row >= 0 && row < rows) {
+                    selectedCell = { row, col };
+                    console.log("Selected cell:", selectedCell);
+                    
+                    layer.children.forEach(child => {
+                        if (child instanceof Konva.Rect) {
+                            const rectCol = Math.round(child.x() / cellWidth);
+                            const rectRow = Math.round(child.y() / cellHeight);
+                            child.stroke(rectCol === col && rectRow === row ? 'red' : 'gray');
+                        }
+                    });
+                    layer.batchDraw();
+                }
+            } 
+        }); 
+        
+        
+        document.getElementById('delete-btn').addEventListener('click', () => {
+
+            console.log("selectedCell ", selectedCell.row, " ", selectedCell.col);
+
+            if (selectedCell.row === -1 || selectedCell.col === -1) return;
+        
+            grid[selectedCell.row][selectedCell.col] = null;
+            rot_grid[selectedCell.row][selectedCell.col] = 0;
+        
+            layer.children.forEach(child => {
+                if (child instanceof Konva.Image && 
+                    Math.floor(child.x() / cellWidth) === selectedCell.col &&
+                    Math.floor(child.y() / cellHeight) === selectedCell.row) {
+                    child.destroy();
+                }
+            });
+        
+            layer.batchDraw();
+        
+            fetch('/api/delete-item/', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({
+                    x: selectedCell.col,
+                    y: selectedCell.row
+                }),
+            }).then(response => {
+                if (!response.ok) throw new Error('Delete failed');
+                return response.json();
+            }).then(data => {
+                console.log('Item deleted:', data);
+                selectedCell = { row: -1, col: -1 }; 
+            }).catch(error => {
+                console.error('Delete error:', error);
+            });
+        });
+        
         for (let i = 0; i < rows; i++) 
         {
             for (let j = 0; j < cols; j++) 
@@ -79,70 +142,185 @@
                 });
                 
                 layer.add(cell);
-
                 const imageObj = new Image();
 
                 if(grid[i][j])
                 {
                     let imageObj = new Image();
                     imageObj.onload = function () {
-                      const konvaImage = new Konva.Image({
-                        x: j * cellWidth,
-                        y: i * cellHeight,
-                        width: cellWidth,
-                        height: cellHeight,
-                        image: imageObj,
-                      });
-                      layer.add(konvaImage);
+
+
+                        if(rot_grid[i][j] === 0)
+                        {
+                            const konvaImage = new Konva.Image({
+                                x: j * cellWidth,
+                                y: i * cellHeight,
+                                width: cellWidth,
+                                height: cellHeight,
+                                image: imageObj,
+                                rotation: rot_grid[i][j], 
+                                gridRow: i,  
+                                gridCol: j  
+                            });
+                            layer.add(konvaImage);
+                        }
+                        else if (rot_grid[i][j] === 90)
+                        {
+                            const konvaImage = new Konva.Image({
+                                x: (j+1) * cellWidth,
+                                y: i * cellHeight,
+                                width: cellHeight,
+                                height: cellWidth,
+                                image: imageObj,
+                                rotation: rot_grid[i][j], 
+                                gridRow: i,  
+                                gridCol: j  
+                            });
+                            layer.add(konvaImage);
+                        }
+                        else if (rot_grid[i][j] === 180)
+                        {
+                            const konvaImage = new Konva.Image({
+                                x: (j+1) * cellWidth,
+                                y: (i+1) * cellHeight,
+                                width: cellWidth,
+                                height: cellHeight,
+                                image: imageObj,
+                                rotation: rot_grid[i][j], 
+                                gridRow: i,  
+                                gridCol: j  
+                            });
+                            layer.add(konvaImage);
+                        }
+                        else if (rot_grid[i][j] === 270)
+                        {
+                            const konvaImage = new Konva.Image({
+                                x: j * cellWidth,
+                                y: (i+1) * cellHeight,
+                                width: cellHeight,
+                                height: cellWidth,
+                                image: imageObj,
+                                rotation: rot_grid[i][j],  
+                                gridRow: i,  
+                                gridCol: j  
+                            });
+                            layer.add(konvaImage);
+                        }
+
                       layer.draw();
+
                     };
                     imageObj.src = grid[i][j];
                 }
-
             }
         }
 
         layer.batchDraw();
 
-        var item_name = '';
-
         document.getElementById('drag-items').addEventListener('dragstart', function (e) {
-            item_name = e.target.src;
+            item_name = e.target.src;        
+            item_rotation =  parseInt(e.target.dataset.rotation || '0');
         });
 
         var con = stage.container();
+
         con.addEventListener('dragover', function (e) 
         {
             e.preventDefault();
         });
 
+        const rotations = new WeakMap();
+
         con.addEventListener('drop', function (e) 
         {
             e.preventDefault();
             stage.setPointersPositions(e);
-        
             const pointerPos = stage.getPointerPosition();
-
-            if (!pointerPos) 
-                return;
-
-            const nearestX = Math.floor(pointerPos.x / cellWidth) * cellWidth;
-            const nearestY = Math.floor(pointerPos.y / cellHeight) * cellHeight;
         
+            if (!pointerPos) return;
+        
+            const col = Math.floor(pointerPos.x / cellWidth);
+            const row = Math.floor(pointerPos.y / cellHeight);
+        
+            const nearestX = col * cellWidth;
+            const nearestY = row * cellHeight;
+
             Konva.Image.fromURL(item_name, function (image) {
                 
-                layer.add(image);
-
-                image.position({
-                    x: nearestX, 
-                    y: nearestY, 
+                const group = new Konva.Group({
+                    x: nearestX,
+                    y: nearestY,
+                    width: cellWidth,
+                    height: cellHeight    
                 });
 
-                image.width(cellWidth );
-                image.height(cellHeight );
-                image.draggable(false); 
-                layer.batchDraw();
+                rotations.set(image, item_rotation);
 
+                if (item_rotation === 0) 
+                {
+                    image.position({
+                        x: 0,
+                        y: 0,
+                        offset: {
+                            x: cellWidth / 2,
+                            y: cellHeight / 2
+                        }
+                    });    
+
+                    image.width(cellWidth);
+                    image.height(cellHeight);
+    
+                }
+                else if (item_rotation === 90) 
+                {
+                    image.position({
+                        x: cellWidth,
+                        y: 0,
+                        offset: {
+                            x: cellWidth / 2,
+                            y: cellHeight / 2
+                        }
+                    });    
+
+                    image.width(cellHeight);
+                    image.height(cellWidth);
+
+                }
+                else if (item_rotation === 180) 
+                {
+                    image.position({
+                        x: cellWidth,
+                        y: cellHeight,
+                        offset: {
+                            x: cellWidth / 2,
+                            y: cellHeight / 2
+                        }
+                    });    
+                    image.width(cellWidth);
+                    image.height(cellHeight);
+                }
+                else if (item_rotation === 270) 
+                {
+                    image.position({
+                        x: 0,
+                        y: cellHeight,
+                        offset: {
+                            x: cellWidth / 2,
+                            y: cellHeight / 2
+                        }
+                    });    
+                    
+                    image.width(cellHeight);
+                    image.height(cellWidth);
+                }
+
+                image.rotation(item_rotation);
+
+                console.log("DROPED AT ", row, " ",  col, " with rotation ", item_rotation);
+
+                group.add(image);
+                layer.add(group);
+                layer.batchDraw();
 
                 console.log("INSIDE DROP HANDLER");
 
@@ -153,12 +331,14 @@
                         //'X-CSRFToken': getCSRFToken(), 
                     },
                     body: JSON.stringify({
-                        x: nearestX/cellWidth,
-                        y: nearestY/cellHeight,
+                        x: col,
+                        y: row,
                         item_name: item_name,
+                        rotation:item_rotation
                     }),
                 })
                     .then((response) => {
+                        item_rotation=0;
                         if (!response.ok) {
                             throw new Error('AOK');
                         }
@@ -170,11 +350,45 @@
                     .catch((error) => {
                         console.error('ERROR: ', error);
                     });
-            });
 
+                image.on('contextmenu', (e) => {
+                    e.evt.preventDefault();
+                    currentRotation = (currentRotation + 90) % 360; 
+                    image.rotation(currentRotation); 
+                    layer.batchDraw();
+                });
+            
+                image.on('mousedown', (e) => {
+                    
+                    if (e.evt.button === 2) {
+                        e.evt.preventDefault();
+                        currentRotation = (currentRotation + 90) % 360; 
+                        image.rotation(currentRotation); 
+                        layer.batchDraw();
+                    }
+                });
+        
+            });
+            
+            
         });
 
-        
+        document.getElementById('drag-items').addEventListener('click', function (e) {
+
+            if (e.target.tagName === 'IMG') {
+    
+                e.preventDefault(); 
+    
+                const currentRotation = parseInt(e.target.dataset.rotation || '0');
+                const newRotation = (currentRotation + 90) % 360;
+                
+                item_rotation = newRotation;
+                e.target.style.transform = `rotate(${newRotation}deg)`;
+                e.target.dataset.rotation = newRotation.toString();
+            }
+        });
+
+
     </script>
 
     <style>
@@ -185,7 +399,7 @@
 
         #container {
             border: 2px;
-            background-color:rgb(0, 255, 81);
+            background-color: rgb(66, 248, 10);
             width: 100%; 
             height: 100%;
             position: relative;
@@ -200,7 +414,7 @@
         .btn {
             display: inline-block;
             padding: 8px 12px;
-            background-color: #007bff;
+            background-color:rgb(136, 0, 255);
             color: white;
             text-decoration: none;
             cursor: pointer;
@@ -209,7 +423,7 @@
         }
 
         .btn:hover {
-            background-color: #0056b3;
+            background-color:rgb(149, 84, 121);
         }
 
         .button-container {

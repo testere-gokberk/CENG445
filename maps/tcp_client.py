@@ -181,7 +181,7 @@ def send_component_to_server(username: str, map_id: str, component: str, row: st
 
         try:
             component_id = create_response.get("component_id")
-            print(create_response)
+            print("AŞALALLAL ", create_response)
             if not component_id and component_id != 0:
                 return json.dumps({"status": "error", "message": "Failed to create component"})
         except KeyError:
@@ -201,7 +201,7 @@ def send_component_to_server(username: str, map_id: str, component: str, row: st
         wsock.send(json.dumps(detach_command))
         detach_response = message_queue.get()
 
-        return ensure_json_response(json.dumps(place_response))
+        return ensure_json_response(json.dumps(create_response))#create_response# ensure_json_response(json.dumps(place_response))
 
     except Exception as e:
         return json.dumps({
@@ -222,6 +222,8 @@ def send_delete_to_server(username: str, map_id: str, command: str, *args) -> st
         wsock.send(json.dumps(attach_command))
         attach_response = message_queue.get()
 
+        print("ATTECH IN DELETE ", attach_response)
+    
         delete_command = {
             "command": command.lower().replace(" ", "_"),
             "params": list(args)
@@ -229,12 +231,16 @@ def send_delete_to_server(username: str, map_id: str, command: str, *args) -> st
         wsock.send(json.dumps(delete_command))
         delete_response = message_queue.get()
 
+        print("DELETE RESPONS  IN DELETE ", delete_response)
+
         detach_command = {
             "command": "detach",
             "params": [map_id]
         }
         wsock.send(json.dumps(detach_command))
         detach_response = message_queue.get()
+        
+        print("detach_response IN DELETE ", detach_response)
 
         return ensure_json_response(delete_response)
 
@@ -252,6 +258,7 @@ def send_rotate_to_server(username: str, map_id: str, command: str, *args) -> st
             "command": "attach",
             "params": [map_id]
         }
+        
         wsock.send(json.dumps(attach_command))
         attach_response = message_queue.get()
 
@@ -377,3 +384,24 @@ def send_save_to_server(username: str, map_id: str, command: str) -> str:
             "status": "error",
             "message": f"Error: {str(e)}"
         })
+        
+def get_comp_id_to_server(username: str, map_id: str, command: str, x:int, y:int) -> str:
+    
+    try:
+        wsock, message_queue, stop_event = maintain_connection(username, map_id)
+
+        save_command = {
+            "command": "get_info",
+            "params": [map_id, x, y]
+        }
+        
+        wsock.send(json.dumps(save_command))
+        save_response = message_queue.get()
+
+        return ensure_json_response(save_response)
+
+    except Exception as e:
+        return json.dumps({
+            "status": "error",
+            "message": f"Error: {str(e)}"
+        })        

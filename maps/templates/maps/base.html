@@ -67,9 +67,11 @@
                 <li><a href="{% url 'home' %}" class="btn">Home</a></li>
                 {% if username_submitted %}
                     <li><a href="{% url 'create_map' %}" class="btn">Create New Map</a></li>
-                    <li><a href="{% url 'create_component' %}" class="btn">Create Component</a></li>
+                    
+                    <!--<li><a href="{% url 'create_component' %}" class="btn">Create Component</a></li-->
+                    
                     <li><a href="{% url 'list_maps' %}" class="btn">List Maps</a></li>
-                    <li><a href="{% url 'view_map' %}" class="btn">View Attached Map</a></li>
+                    <li><a href="{% url 'view_map' %}" class="btn">View &amp Edit Attached Map</a></li>
                     <li><a href="{% url 'delete_component' %}" class="btn">Delete Component</a></li>
                     <li><a href="{% url 'rotate_component' %}" class="btn">Rotate Component</a></li>
                     

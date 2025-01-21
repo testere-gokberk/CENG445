@@ -68,7 +68,7 @@ class Map:
 
     def getxy(self, y:int, x:int):
 
-        return self.cells[x%self.cellsize][y%self.cellsize][-1]
+        return self.cells[x][y][-1]
 
     def place(self, obj, y:int, x:int):
 

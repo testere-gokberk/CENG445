@@ -106,6 +106,7 @@ class MapServer:
             with self.lock:
                 attached_maps = self.repo.listattached(username) if username in self.repo.users else []
                 if attached_maps:
+                    
                     attached_map_id = attached_maps[0]
                     map_object = self.repo.objects[attached_map_id]
 
@@ -408,10 +409,29 @@ class MapServer:
                     map = self.repo.objects[obj_id]
                     x = [map.rows, map.cols, map.cellsize, map.bgcolor]
                     return {"status": "success","message" : f"map size returned","map_size" : x}
+                
+                elif command == "component_at":
+                    
+                    print("INSIDE COMPONENT AT")
+                    
+                    print("PARAMS ", params)
+                    
+                    map_id = int(params[0])
+                    rows = int(params[1])
+                    cols = int(params[2])
+                    
+                    map = self.repo.objects[map_id]
+
+                    print("MAP ", map)
+
+                    component_id = map.getxy(rows,cols).id
+                    
+                    print("COMP ID ", component_id)
+
+                    return {"status": "success", "obj_id":component_id}
 
                 elif command == "save":
                     return {"status": "success","message" : f"repo saved successfully"}
-
 
                 else:
                     return {"status": "error", "message": "Invalid command"}

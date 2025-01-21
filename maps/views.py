@@ -167,10 +167,10 @@ def view_map(request):
         "ferrari":"/static/maps/images/car_topview.svg",
         "rock": "/static/maps/images/rock.svg",
         "booster":"maps\\images\\booster.svg",
-        "checkpoint":"/static/maps/images/  checkpoint.png",
+        "checkpoint":"/static/maps/images/checkpoint.png",
         "friction":"/static/maps/images/friction.svg",
         "slippery" : "/static/maps/images/slippery.png",
-        "turn" : "static/maps/images/road_asphalt41.png",
+        "turn" : "/static/maps/images/road_asphalt41.png",
         "straight": "/static/maps/images/road_asphalt01.png",
         "fuel" : "/static/maps/images/fuel.svg",
         "merso": "/static/maps/images/merso.svg",
@@ -232,6 +232,7 @@ def view_map(request):
         print("ROWS ", rows, " COLS ", cols)
 
         grid = [["" for j in range(cols)] for i in range(rows)]
+        rot_grid = [[0 for j in range(cols)] for i in range(rows)]
 
         components = response_json.get('components', {})
         
@@ -243,14 +244,17 @@ def view_map(request):
 
             if comp_type in svg_mapping:
                 grid[row][col] = svg_mapping[comp_type] # rotationu ayrı arraye koy
-
+                rot_grid[row][col] = rotation
+                
         print("GRID TO RENDER ", grid)
+        print("ROT GRID ", rot_grid)
 
         return render(request, 'maps/view_map.html', {
             'username_submitted': username is not None,
             "username": username,
             "map_id": map_id,
             'grid': grid,
+            "rot_grid" :rot_grid,
             "color": bgcolor,
         })
     
@@ -455,7 +459,6 @@ def save_repo(request):
 
     return render(request, 'maps/save_repo.html', context)
 
-
 def start_game_mode(request):
     username = request.session.get('username', None)
     map_id = request.session.get('map_id', None)
@@ -476,7 +479,6 @@ def start_game_mode(request):
 
     return render(request, 'maps/list_maps.html', context)
 
-
 def parse_url(input_string):
     
     last_slash = input_string.rfind('/')
@@ -485,7 +487,6 @@ def parse_url(input_string):
     if last_slash != -1 and last_dot != -1 and last_dot > last_slash:
         return input_string[last_slash + 1:last_dot]
     return ""
-
 
 @csrf_exempt
 def item_dropped(request):
@@ -503,7 +504,8 @@ def item_dropped(request):
         "car_topview": "Ferrari",
         "checkpoint" : "checkpoint",
         "slippery":"slippery",
-        "friction":"friction"
+        "friction":"friction",
+        "merso":"merso",
     }
 
     if request.method == 'POST':
@@ -511,20 +513,60 @@ def item_dropped(request):
         data = json.loads(request.body)
         x = data.get('x')
         y = data.get('y')
+        rotation = data.get("rotation")
         item_name = data.get('item_name')
         
         item_name = parse_url(item_name)
-        print(f"ITEM DROPPED {x} {y} name {item_name}")
+        
+        print(f"ITEM DROPPED {x} {y} name {item_name}, with rotation {rotation}")
         print("ADDING DROPPED COMPONENT ", username, item_name, x, " " ,y)
-        
-        
         
         response = tcp_client.send_component_to_server(username, map_id, url_2_image[item_name], y, x)
         # urlleri item adına dönüştür
         response_json = json.loads(response)
-        
         print("DROP RESPONSE ", response_json)
+    
+        comp_id = response_json["component_id"]
+    
+        rotation = rotation//90
+    
+        for i in range(rotation):
+            response = tcp_client.send_rotate_to_server(username, map_id, "rotate", comp_id)
+            response_json = json.loads(response)
+            print("ROTATE RESPONSE ", response_json)
+        
         
         return JsonResponse({'status': 'success'})
     
+    return JsonResponse({'status': 'error'}, status=400)
+
+@csrf_exempt
+def delete_item(request):
+    
+    print("DEELETION ENDPOINT")
+    if request.method == 'POST':
+        
+        username = request.session.get('username', None)
+        map_id = request.session.get('map_id', None)
+
+        data = json.loads(request.body)
+        x = data.get('x')
+        y = data.get('y')
+        
+        print(" DEELETE " , x , " ", y , "in ", map_id)
+        
+        response = tcp_client.send_to_server(username, "component_at", map_id, x, y)
+        response_json = json.loads(response)
+
+        print("GET COMP ID RESPONSE ", response_json)
+        comp_id = response_json.get("obj_id")
+        
+        print("OBJ ID of deletion ", comp_id)
+        
+        response  = tcp_client.send_delete_to_server(username,map_id,"delete","component", comp_id)
+        response_json = json.loads(response)
+        
+        print("DELETE RESPONSE ", response_json)
+
+        return JsonResponse({'status': 'success', 'x': x, 'y': y})
     return JsonResponse({'status': 'error'}, status=400)
