@@ -453,9 +453,9 @@ def save_repo(request):
         'map_id': map_id,
     }
 
-    if request.method == 'POST':  # When Save Repo button is clicked
+    if request.method == 'POST':  
         response = tcp_client.send_save_to_server(username, map_id, 'save')
-        context['response'] = response  # Pass the response to the template
+        context['response'] = response  
 
     return render(request, 'maps/save_repo.html', context)
 
@@ -544,7 +544,6 @@ def item_dropped(request):
         return JsonResponse({'status': 'error', 'message': str(e)}, status=400)
     finally:
         pass
-
 
 @csrf_exempt
 def delete_item(request):

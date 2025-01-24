@@ -20,7 +20,6 @@ def listen_for_messages(wsock, message_queue, stop_event, map_id, username):
 
                 if parsed_message.get("status") == "notification":
 
-                    ##handle notification here
                     print(f"Notification received for map {map_id} and user {username} {parsed_message}")
                     continue
 
@@ -79,7 +78,7 @@ def cleanup_connection(username: str, map_id: str):
         del message_queues[username]
         del stop_events[username]
 
-def create_websocket_connection(host: str = "127.0.0.1", port: int = 1423) -> Any:
+def create_websocket_connection(host: str = "127.0.0.1", port: int = 1423) :
     try:
         return connect(f"ws://{host}:{port}")
     except WebSocketException as e:
@@ -128,7 +127,6 @@ def send_listmaps_to_server(username: str, command: str, *args) -> str:
         return json.dumps({"status": "error", "message": "Username is required"})
 
     try:
-        # Create a new independent connection
         wsock = create_websocket_connection()
         if not wsock:
             return json.dumps({"status": "error", "message": "Could not connect to server"})
@@ -148,7 +146,7 @@ def send_listmaps_to_server(username: str, command: str, *args) -> str:
             return ensure_json_response(response)
 
         finally:
-            # Always close this independent connection
+
             wsock.close()
 
     except Exception as e:
@@ -342,7 +340,6 @@ def send_gamemode_to_server(username: str, map_id: str,command:str) -> str:
                         notification = json.loads(message_queue.get(timeout=1))
 
                         if notification.get("status") == "notification":
-                            # Handle the notification here
                             print(f"Game notification received: {notification}")
 
                     except queue.Empty:

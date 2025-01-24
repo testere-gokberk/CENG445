@@ -32,6 +32,43 @@
 
     <script>
 
+        const username = "admin";
+        let currentMapId = "{{ map_id }}";  
+        let authenticated = false;
+
+
+        const ws = new WebSocket('ws://localhost:1423');
+
+        ws.onopen = function(event) {
+            console.log('WebSocket connected');
+        };
+
+        ws.onmessage = function(event) {
+            const data = JSON.parse(event.data);
+            
+            if (data.status === "request" && data.message.includes("username")) {
+                ws.send(JSON.stringify({
+                    "username": "admino",
+                    "client_type": "browser"
+                }));
+            }
+            
+            if (data.status === "notification") {
+                console.log('Real-time update:', data);
+            }
+        };
+        
+
+
+        ws.onerror = function(error) {
+            console.error('WebSocket error:', error);
+        };
+        
+        ws.onclose = function(event) {
+            console.log('WebSocket disconnected:', event.reason);
+            authenticated = false;
+        };        
+
         //var bg_color = {{color|safe}};
         //document.documentElement.style.setProperty('--color', bg_color);  
 

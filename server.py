@@ -1,7 +1,7 @@
 # server.py
 
 import json
-from websockets.sync.server import serve  # Changed import
+from websockets.sync.server import serve  
 from websockets.exceptions import ConnectionClosedError, ConnectionClosedOK
 import threading
 from threading import Lock
@@ -58,7 +58,7 @@ class MapServer:
 
             print(f"User connected: {username}")
 
-            # Handle existing or new user
+
             if username in self.repo.users:
                 wsock.send(json.dumps({
                     "status": "success",
